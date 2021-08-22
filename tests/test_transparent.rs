@@ -1,4 +1,8 @@
 #![deny(clippy::all, clippy::pedantic)]
+#![allow(
+    // Clippy bug: https://github.com/rust-lang/rust-clippy/issues/7422
+    clippy::nonstandard_macro_braces,
+)]
 
 use anyhow::anyhow;
 use std::error::Error as _;
@@ -56,4 +60,25 @@ fn test_anyhow() {
     let error = Any::from(anyhow!("inner").context("outer"));
     assert_eq!("outer", error.to_string());
     assert_eq!("inner", error.source().unwrap().to_string());
+}
+
+#[test]
+fn test_non_static() {
+    #[derive(Error, Debug)]
+    #[error(transparent)]
+    struct Error<'a> {
+        inner: ErrorKind<'a>,
+    }
+
+    #[derive(Error, Debug)]
+    enum ErrorKind<'a> {
+        #[error("unexpected token: {:?}", token)]
+        Unexpected { token: &'a str },
+    }
+
+    let error = Error {
+        inner: ErrorKind::Unexpected { token: "error" },
+    };
+    assert_eq!("unexpected token: \"error\"", error.to_string());
+    assert!(error.source().is_none());
 }

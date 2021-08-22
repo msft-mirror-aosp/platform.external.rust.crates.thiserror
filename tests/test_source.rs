@@ -1,4 +1,8 @@
 #![deny(clippy::all, clippy::pedantic)]
+#![allow(
+    // Clippy bug: https://github.com/rust-lang/rust-clippy/issues/7422
+    clippy::nonstandard_macro_braces,
+)]
 
 use std::error::Error as StdError;
 use std::io;
@@ -60,4 +64,8 @@ macro_rules! error_from_macro {
 }
 
 // Test that we generate impls with the proper hygiene
-error_from_macro!(#[error("Something")] Variant(#[from] io::Error));
+#[rustfmt::skip]
+error_from_macro! {
+    #[error("Something")]
+    Variant(#[from] io::Error)
+}
