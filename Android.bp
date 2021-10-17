@@ -41,6 +41,8 @@ rust_library {
     name: "libthiserror",
     host_supported: true,
     crate_name: "thiserror",
+    cargo_env_compat: true,
+    cargo_pkg_version: "1.0.29",
     srcs: ["src/lib.rs"],
     edition: "2018",
     proc_macros: ["libthiserror_impl"],
@@ -50,10 +52,3 @@ rust_library {
         "com.android.virt",
     ],
 }
-
-// dependent_library ["feature_list"]
-//   proc-macro2-1.0.28 "default,proc-macro"
-//   quote-1.0.9 "default,proc-macro"
-//   syn-1.0.74 "clone-impls,default,derive,parsing,printing,proc-macro,quote"
-//   thiserror-impl-1.0.26
-//   unicode-xid-0.2.2 "default"
