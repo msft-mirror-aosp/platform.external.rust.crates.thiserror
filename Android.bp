@@ -48,6 +48,7 @@ rust_library {
     proc_macros: ["libthiserror_impl"],
     apex_available: [
         "//apex_available:platform",
+        "com.android.bluetooth",
         "com.android.compos",
         "com.android.resolv",
         "com.android.uwb",
