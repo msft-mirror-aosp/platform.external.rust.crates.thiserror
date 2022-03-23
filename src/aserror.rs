@@ -1,41 +1,33 @@
 use std::error::Error;
-use std::panic::UnwindSafe;
 
-pub trait AsDynError<'a> {
-    fn as_dyn_error(&self) -> &(dyn Error + 'a);
+pub trait AsDynError {
+    fn as_dyn_error(&self) -> &(dyn Error + 'static);
 }
 
-impl<'a, T: Error + 'a> AsDynError<'a> for T {
+impl<T: Error + 'static> AsDynError for T {
     #[inline]
-    fn as_dyn_error(&self) -> &(dyn Error + 'a) {
+    fn as_dyn_error(&self) -> &(dyn Error + 'static) {
         self
     }
 }
 
-impl<'a> AsDynError<'a> for dyn Error + 'a {
+impl AsDynError for dyn Error + 'static {
     #[inline]
-    fn as_dyn_error(&self) -> &(dyn Error + 'a) {
+    fn as_dyn_error(&self) -> &(dyn Error + 'static) {
         self
     }
 }
 
-impl<'a> AsDynError<'a> for dyn Error + Send + 'a {
+impl AsDynError for dyn Error + Send + 'static {
     #[inline]
-    fn as_dyn_error(&self) -> &(dyn Error + 'a) {
+    fn as_dyn_error(&self) -> &(dyn Error + 'static) {
         self
     }
 }
 
-impl<'a> AsDynError<'a> for dyn Error + Send + Sync + 'a {
+impl AsDynError for dyn Error + Send + Sync + 'static {
     #[inline]
-    fn as_dyn_error(&self) -> &(dyn Error + 'a) {
-        self
-    }
-}
-
-impl<'a> AsDynError<'a> for dyn Error + Send + Sync + UnwindSafe + 'a {
-    #[inline]
-    fn as_dyn_error(&self) -> &(dyn Error + 'a) {
+    fn as_dyn_error(&self) -> &(dyn Error + 'static) {
         self
     }
 }
