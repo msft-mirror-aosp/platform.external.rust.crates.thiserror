@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule: [cron: "40 1 * * *"]
 
 permissions:
@@ -12,16 +13,18 @@ env:
   RUSTFLAGS: -Dwarnings
 
 jobs:
+  pre_ci:
+    uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
+
   test:
     name: Rust ${{matrix.rust}}
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        rust: [beta, stable, 1.56.0]
-        include:
-          - rust: nightly
-            rustflags: --cfg thiserror_nightly_testing
+        rust: [nightly, beta, stable, 1.56.0]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v3
@@ -29,20 +32,13 @@ jobs:
         with:
           toolchain: ${{matrix.rust}}
           components: rust-src
+      - name: Enable type layout randomization
+        run: echo RUSTFLAGS=${RUSTFLAGS}\ -Zrandomize-layout >> $GITHUB_ENV
+        if: matrix.rust == 'nightly'
+      - name: Enable nightly-only tests
+        run: echo RUSTFLAGS=${RUSTFLAGS}\ --cfg=thiserror_nightly_testing >> $GITHUB_ENV
+        if: matrix.rust == 'nightly'
       - run: cargo test --all
-        env:
-          RUSTFLAGS: ${{matrix.rustflags}} ${{env.RUSTFLAGS}}
-
-  msrv:
-    name: Rust 1.31.0
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.31.0
-        with:
-          components: rust-src
-      - run: cargo check
 
   clippy:
     name: Clippy
@@ -58,6 +54,8 @@ jobs:
 
   miri:
     name: Miri
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
